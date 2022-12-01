@@ -8,7 +8,7 @@
 systemctl --user start docker.service
 
 #Command to start the docker service.
-docker run --gpus all -it --rm -v $PWD:/work nvcr.io/nvidia/tensorflow:22.02-tf1-py3 bash
+docker run --gpus all -it --rm -v <full path of your git clone for cs752-project repo>:/work nvcr.io/nvidia/tensorflow:22.02-tf1-py3 bash
 
 #Command to install the needed packages
 pip install imageio imageio-ffmpeg configargparse
