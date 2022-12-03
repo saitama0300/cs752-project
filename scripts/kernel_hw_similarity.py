@@ -38,7 +38,7 @@ def get_df(filename):
     # 'launch__thread_count', 'launch__block_size', 'launch__thread_count', 'launch__waves_per_multiprocessor', 'launch__registers_per_thread']
     
     df2 = df.filter(stats_of_interest, axis=1)
-    df_print = df.filter( ['Kernel Name'] + stats_of_interest, axis=1)
+    df_print = df.filter( ['Kernel Name', 'gpc__cycles_elapsed.max'] + stats_of_interest, axis=1)
     df_print = df_print.drop([0], axis=0)
     df2 = df2.drop([0], axis=0)
     df_print.to_csv('kernel_signatures_all.csv')
