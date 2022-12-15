@@ -148,7 +148,7 @@ def pick_clusters(dists, tol=0.05):
     ignore_list = set()
     for i in range(len(dists)):
         if i in ignore_list: continue
-
+        rep_list.add(i)
         for j in range(len(dists)):
             if dists[i, j] > tol:
                 if (j in ignore_list): continue
