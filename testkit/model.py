@@ -5,13 +5,17 @@ import os
 import sys
 
 # Hyper Parameters
-NUM_FEATURES = 2048 * 4
+NUM_FEATURES = 60
 HIDDEN_LAYER_SIZE = 1024 * 16
-BATCH_SIZE = 90
+BATCH_SIZE = 32 * 32 * 16
 
-FC1_OUTPUT = 4096 * 4 * 2
-FC2_OUTPUT = 60
-FC3_OUTPUT = 1
+FC1_OUTPUT = 512
+FC2_OUTPUT = 2
+FC3_OUTPUT = 256
+FC4_OUTPUT = 256
+CAT_SIZE = 24
+FC5_OUTPUT = 256
+FC6_OUTPUT = 1
 #
 
 CASIO=os.environ.get('CASIO')
@@ -29,6 +33,9 @@ class Feedforward(torch.nn.Module):
         self.fc1 = torch.nn.Linear(self.input_size, FC1_OUTPUT)
         self.fc2 = torch.nn.Linear(FC1_OUTPUT, FC2_OUTPUT)
         self.fc3 = torch.nn.Linear(FC2_OUTPUT, FC3_OUTPUT)
+        self.fc4 = torch.nn.Linear(FC3_OUTPUT, FC4_OUTPUT)
+        self.fc5 = torch.nn.Linear(FC4_OUTPUT + CAT_SIZE, FC5_OUTPUT)
+        self.fc6 = torch.nn.Linear(FC5_OUTPUT, FC6_OUTPUT)
         self.relu = torch.nn.ReLU()
         self.sigmoid = torch.nn.Sigmoid()
 
@@ -36,6 +43,7 @@ class Feedforward(torch.nn.Module):
         # We need to perform sin multiple times, so that it shows
         # up in the sampling.     
         # NUM_FEATURES can affect throughput of sin
+        sinx = x[:]
         for _ in range(50):
             x = torch.sin(x)
         output_fc1 = self.fc1(x)
@@ -51,9 +59,22 @@ class Feedforward(torch.nn.Module):
         for _ in range(100):
             output_fc2 = torch.sqrt(output_fc2)
         output_fc3 = self.fc3(output_fc2)
-        
+
+        # Bunch of FC layers so that SGEMM is called
+        output_fc4 = self.fc4(output_fc3)
+        output_fc4 = self.relu(output_fc4)
+
+        gamma = torch.randn(BATCH_SIZE, CAT_SIZE).to(device)
+        output_fc4 = torch.cat((output_fc4, gamma), 1)
+
+        output_fc5 = self.fc5(output_fc4)
+        output_fc5 = self.relu(output_fc5)
+
+        output_fc6 = self.fc6(output_fc5)
+        output_fc6 = self.relu(output_fc6)
+
         # Sigmoid in the end to satisfy pytorch training constraints
-        output = self.sigmoid(output_fc3)
+        output = self.sigmoid(output_fc6)
         return output
 
 from sklearn.datasets import make_blobs
