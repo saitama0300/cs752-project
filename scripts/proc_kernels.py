@@ -21,7 +21,7 @@ def preproc_kernel_data(inputfile, repfile, allfile):
     dists = squareform(packed_dists)
 
 
-    rep_list = utils.pick_clusters(dists)
+    rep_list = utils.pick_clusters(dists, 0.01)
     print(f'# Total Rep Kernels: {len(rep_list)}')
     print('Rep Kernel List', rep_list)
 
