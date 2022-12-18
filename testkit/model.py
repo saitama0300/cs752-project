@@ -11,14 +11,15 @@ HIDDEN_LAYER_SIZE = 1024 * 16
 #
 
 CASIO=os.environ.get('CASIO')
+DEV=os.environ.get('DEV').strip()
 sys.path.append(f'{CASIO}/utils')
 import cudaprofile
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device(DEV if torch.cuda.is_available() else "cpu")
 print(device)
 
 class Feedforward(torch.nn.Module):
-    def __init__(self, input_size ):
+    def __init__(self, input_size):
         super(Feedforward, self).__init__()
         self.input_size = input_size
         self.fc1 = torch.nn.Linear(self.input_size, 1)
@@ -31,7 +32,7 @@ class Feedforward(torch.nn.Module):
         for _ in range(100):
             x = torch.sin(x)
         output = self.fc1(x)
-        output = self.sigmoid(hidden)
+        output = self.sigmoid(output)
         return output
 
 from sklearn.datasets import make_blobs
@@ -50,7 +51,7 @@ x_test = torch.FloatTensor(x_test).to(device)
 y_test = torch.FloatTensor(blob_label(y_test, 0, [0])).to(device)
 y_test = torch.FloatTensor(blob_label(y_test.cpu(), 1, [1,2,3])).to(device)
 
-model = Feedforward(NUM_FEATURES, HIDDEN_LAYER_SIZE).to(device)
+model = Feedforward(NUM_FEATURES).to(device)
 criterion = torch.nn.BCELoss()
 optimizer = torch.optim.SGD(model.parameters(), lr = 0.01)
 
