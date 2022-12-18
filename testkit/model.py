@@ -14,7 +14,7 @@ FC2_OUTPUT = 2
 FC3_OUTPUT = 256
 FC4_OUTPUT = 256
 CAT_SIZE = 24
-FC5_OUTPUT = 256
+FC5_OUTPUT = 1
 FC6_OUTPUT = 1
 #
 
@@ -49,8 +49,11 @@ class Feedforward(torch.nn.Module):
         output_fc1 = self.fc1(x)
 
         # FC1_OUTPUT can affect throughout of cos
+        # convert to double so that double kernel is used
+        output_fc1 = output_fc1.double()
         for _ in range(100):
             output_fc1 = torch.cos(output_fc1)
+        output_fc1 = output_fc1.float()
         output_fc2 = self.fc2(output_fc1)
         output_fc2 = self.relu(output_fc2) # apply RELU for any kernel that expects positive values
                                            # like
@@ -67,11 +70,8 @@ class Feedforward(torch.nn.Module):
         output_fc5 = self.fc5(output_fc4)
         output_fc5 = self.relu(output_fc5)
 
-        output_fc6 = self.fc6(output_fc5)
-        output_fc6 = self.relu(output_fc6)
-
         # Sigmoid in the end to satisfy pytorch training constraints
-        output = self.sigmoid(output_fc6)
+        output = self.sigmoid(output_fc5)
         return output
 
 from sklearn.datasets import make_blobs

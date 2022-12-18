@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from argparse import ArgumentParser
 from scipy.spatial import distance
+import csv
 
 '''
 Example Usage:
@@ -48,17 +49,17 @@ def main():
         for line in rf:
             line_s = line.strip()
             if args.test in line_s:
-                ref_list.append((line_s, to_float(parse_original_line(line_s))))
+                ref_list.append((line_s, to_float(parse_proc_line(line_s))))
     
-    # print(input_list, ref_list)
-
     for line, val in input_list:
         for ref, refval in ref_list:
             dist = distance.cosine(val, refval) 
             print(distance.cosine(val, refval))
-            if dist <= 0.05:
-                print(line, ref)
-
+            if dist <= 0.2:
+                print("SYNTH:", "[{}]".format(line.split('\t')[0]), line.split('\t')[1])
+                print("NERF:", "[{}]".format(ref.split('\t')[0]), ref.split('\t')[1])
+                print("MATCH:", line.split('\t')[1] == ref.split('\t')[1])
+                print()
 
 if __name__ == '__main__':
     main()
