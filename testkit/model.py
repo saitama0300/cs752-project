@@ -34,7 +34,7 @@ class Feedforward(torch.nn.Module):
         self.fc2 = torch.nn.Linear(FC1_OUTPUT, FC2_OUTPUT)
         self.fc3 = torch.nn.Linear(FC2_OUTPUT, FC3_OUTPUT)
         self.fc4 = torch.nn.Linear(FC3_OUTPUT, FC4_OUTPUT)
-        self.fc5 = torch.nn.Linear(FC4_OUTPUT + CAT_SIZE, FC5_OUTPUT)
+        self.fc5 = torch.nn.Linear(FC4_OUTPUT, FC5_OUTPUT)
         self.fc6 = torch.nn.Linear(FC5_OUTPUT, FC6_OUTPUT)
         self.relu = torch.nn.ReLU()
         self.sigmoid = torch.nn.Sigmoid()
@@ -55,7 +55,7 @@ class Feedforward(torch.nn.Module):
         output_fc2 = self.relu(output_fc2) # apply RELU for any kernel that expects positive values
                                            # like
 
-        # FC2_SIZE can affect throughput of SQRT
+        # FC2_OUTPUT can affect throughput of SQRT
         for _ in range(100):
             output_fc2 = torch.sqrt(output_fc2)
         output_fc3 = self.fc3(output_fc2)
@@ -63,9 +63,6 @@ class Feedforward(torch.nn.Module):
         # Bunch of FC layers so that SGEMM is called
         output_fc4 = self.fc4(output_fc3)
         output_fc4 = self.relu(output_fc4)
-
-        gamma = torch.randn(BATCH_SIZE, CAT_SIZE).to(device)
-        output_fc4 = torch.cat((output_fc4, gamma), 1)
 
         output_fc5 = self.fc5(output_fc4)
         output_fc5 = self.relu(output_fc5)
